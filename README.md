@@ -12,7 +12,7 @@
 
 3. add link to video
 
-- Video link: 
+- Video link: https://drive.google.com/file/d/1-EDza1OAuWfwBBgOUcQE2bbUvoJIpZc_/view?usp=sharing
 
 4. congratulate your team on Submission in the Discord Team Chat
 
