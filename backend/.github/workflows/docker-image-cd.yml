@@ -1,0 +1,21 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - name: Pull Docker image
+      run: sudo docker pull hoangnv99/teamfab-backend:latest
+    - name: Delete Old docker container
+      run: sudo docker rm -f teamfab-backend || true
+    - name: Run Docker Container
+      run: sudo docker run -e AWS_ACCESS_KEY_ID=AKIA6BGT23DWUQJ6CRG2 -e AWS_SECRET_ACCESS_KEY=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 -e AWS_REGION=ap-west-2 -d -p 8000:8000 --name teamfab-backend hoangnv99/teamfab-backend

@@ -1,0 +1,5 @@
+boto3
+langchain-aws
+fastapi
+boto3
+uvicorn
