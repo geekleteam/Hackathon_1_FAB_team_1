@@ -61,6 +61,7 @@ const ChatResponse: React.FC = () => {
   };
 
   return (
+    // <></>
     <div
       className={`flex flex-col p-2 ${
         submitted ? "overflow-auto" : "overflow-hidden"

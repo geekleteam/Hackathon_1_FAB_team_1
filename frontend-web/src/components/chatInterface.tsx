@@ -33,7 +33,7 @@ const ChatInterface: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="mb-36 max-w-lg px-4 md:px-0">
-        <Frame className="ml-48 mb-4 md:mb-4 items-center justify-center" />
+        {/* <Frame className="ml-48 mb-4 md:mb-4 items-center justify-center" /> */}
         <span className="text-green-500 text-4xl font-normal font-Roboto my-8 md:my-4 sm:my-2">
           Holla,
         </span>
@@ -42,9 +42,9 @@ const ChatInterface: React.FC = () => {
         </span>
         <br />
         <div className="text-4xl font-normal text-[#767676] font-Roboto">
-          Need a bug fix or a Laugh?
+          Need a Design Solution?
         </div>
-        <section className="flex flex-col md:flex-row mt-4 md:mt-4 space-y-4 md:space-y-0 md:space-x-4">
+        {/* <section className="flex flex-col md:flex-row mt-4 md:mt-4 space-y-4 md:space-y-0 md:space-x-4">
           {prompts.map((prompt) => (
             <Link
               key={prompt.id}
@@ -62,7 +62,7 @@ const ChatInterface: React.FC = () => {
               </div>
             </Link>
           ))}
-        </section>
+        </section> */}
       </div>
       <Form onSubmit={handleSubmit} />
     </div>

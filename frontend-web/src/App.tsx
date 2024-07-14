@@ -9,15 +9,15 @@ import ChatMarkdown from "./components/chatMarkdown";
 function App() {
   return (
     <div className="App">
-      <Sidebar />
+      {/* <Sidebar /> */}
       <Routes>
         {/* Redirect from root to chat-interface */}
         <Route path="/" element={<Navigate to="/chat-interface" />} />
         
         <Route path="/chat-interface" element={<ChatInterface />} />
         <Route path="/response/:id" element={<ChatResponse />} />
-        <Route path="/chat-markdown/:id" element={<ChatMarkdown />} />
-        <Route path="/filter-Page" element={<FilterPage />} />
+        {/* <Route path="/chat-markdown/:id" element={<ChatMarkdown />} /> */}
+        {/* <Route path="/filter-Page" element={<FilterPage />} /> */}
       </Routes>
     </div>
   );

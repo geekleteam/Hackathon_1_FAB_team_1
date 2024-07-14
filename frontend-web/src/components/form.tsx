@@ -12,18 +12,20 @@ const Form: React.FC<FormData> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(query);
-    // Navigate to the new page with the text "testing"
-    navigate("/response/:id");
+    console.log("The Query -> ", query)
+    // onSubmit(query);
+    // // Navigate to the new page with the text "testing"
+    // navigate("/response/:id");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto mt-8 md:absolute md:bottom-0 md:left-0 md:right-0">
+    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto mt-8 mb-8 md:absolute md:bottom-0 md:left-0 md:right-0">
       <div className="relative flex items-center rounded-full border-gray-200 py-2">
         <input
           type="text"
           value={query}
-          readOnly
+          // readOnly
+          onChange={e => {setQuery(e.target.value)}}
           className="appearance-none bg-[#F3F5F4] border-none w-full rounded-full text-gray-700 py-4 px-4 md:px-2 md:pl-4 md:ml-16 leading-tight focus:outline-none"
           required
         />
