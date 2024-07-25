@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# fix the region_name -> us-west-2
+# Fix the region_name -> us-west-2
 bedrock = boto3.client(service_name="bedrock-runtime", region_name="us-west-2")
 
 
@@ -49,6 +49,34 @@ class DetailedSolutionRequestModel(ModelKWArgs):
     user_input: str
     proposed_solution: str
     tech_stack: str
+
+
+# Sample prompts data
+prompts = [
+    {
+        "id": 1,
+        "text": "Provide tech stack solutions for IoT Home Automation development",
+        "response": "Sure! Here are some tech stacks you can consider...",
+    },
+    {
+        "id": 2,
+        "text": "Suggest an Authentication solution and evaluate it on a High, Medium, or Low scale",
+        "response": "I can present tables in markdown format, which is commonly used in documentation and can be easily rendered in many platforms. Here's an example",
+    },
+]
+
+@app.get("/api/prompts/{id}")
+def get_prompt(id: int):
+    try:
+        prompt = next((p for p in prompts if p["id"] == id), None)
+        if prompt is None:
+            raise HTTPException(status_code=404, detail="Prompt not found")
+        return prompt
+    except Exception as e:
+        logger.error(f"Error fetching prompt: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching prompt: {str(e)}"
+        )
 
 
 @app.post("/generate-solutions")
