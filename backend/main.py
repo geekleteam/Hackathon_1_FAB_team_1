@@ -23,7 +23,11 @@ app.add_middleware(
 )
 
 # Fix the region_name -> us-west-2
-bedrock = boto3.client(service_name="bedrock-runtime", region_name="us-west-2")
+bedrock = boto3.client(service_name="bedrock-runtime",
+    region_name="us-west-2",
+    aws_access_key_id="AKIA6BGT23DWS4LNLP6U",
+    aws_secret_access_key="AZmmJy6qswDqlP4rMx4B4H0H6"
+)
 
 
 class ModelKWArgs(BaseModel):
