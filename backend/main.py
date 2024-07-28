@@ -117,12 +117,23 @@ def generate_detailed_solution(request: DetailedSolutionRequestModel):
             postprocess=False,
             model_kwargs=request.modelParameter,
         )
-        return {
-            "response": result[0],
-            "original_response": result[1],
-            "userID": request.userID,
-            "requestID": request.requestID,
-        }
+        html_response = f"""
+        <html>
+            <head>
+                <title>Generated Solution</title>
+            </head>
+            <body>
+                <h1>Generated Solution</h1>
+                <p>{result[0]}</p>
+                <h2>Original Response</h2>
+                <p>{result[1]}</p>
+                <p>UserID: {request.userID}</p>
+                <p>RequestID: {request.requestID}</p>
+            </body>
+        </html>
+        """
+        return HTMLResponse(content=html_response)
+
 
     except Exception as e:
         logger.error(f"Error generating detailed solution: {str(e)}")
