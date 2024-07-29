@@ -1,11 +1,12 @@
 from logging import getLogger
-
 import boto3
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-
+from fastapi.responses import HTMLResponse
 from llm import get_response_from_llm
 from fastapi.middleware.cors import CORSMiddleware
+import re
+from env import aws_access_key_id, aws_secret_access_key
 
 logger = getLogger(__name__)
 app = FastAPI()
@@ -24,7 +25,9 @@ app.add_middleware(
 
 # Fix the region_name -> us-west-2
 bedrock = boto3.client(service_name="bedrock-runtime",
-    region_name="us-west-2"
+    region_name="us-west-2",
+    aws_access_key_id=aws_access_key_id,
+    aws_secret_access_key=aws_secret_access_key
 )
 
 
@@ -117,6 +120,42 @@ def generate_detailed_solution(request: DetailedSolutionRequestModel):
             postprocess=False,
             model_kwargs=request.modelParameter,
         )
+        
+        def format_paragraph(para):
+            lines = para.split('\n')
+            formatted_text = ""
+
+            for line in lines:
+                match = re.match(r"(\d+\.|[a-z]\.|[ivxlc]+\.)\s*(.*)", line.strip())
+                if match:
+                    prefix = match.group(1)
+                    content = match.group(2)
+                    if re.match(r"\d+\.", prefix):
+                        indent_level = 1
+                    elif re.match(r"[a-z]\.", prefix):
+                        indent_level = 2
+                    elif re.match(r"[ivxlc]+\.", prefix):
+                        indent_level = 3
+                    else:
+                        indent_level = 0
+                else:
+                    prefix = ""
+                    content = line.strip()
+                    indent_level = 0
+
+                indent_style = f"margin-left: {20 * indent_level}px;"
+                formatted_text += f'<p style="{indent_style}">{prefix} {content}</p>'
+
+            return formatted_text
+
+        # Split the response into paragraphs
+        generated_solution_paragraphs = result[0].split('\n\n')
+        original_response_paragraphs = result[1].split('\n\n')
+
+        # Create HTML paragraphs with proper indentation
+        generated_solution_html = ''.join(format_paragraph(para) for para in generated_solution_paragraphs if para.strip())
+        original_response_html = ''.join(format_paragraph(para) for para in original_response_paragraphs if para.strip())
+
         html_response = f"""
         <html>
             <head>
@@ -124,16 +163,15 @@ def generate_detailed_solution(request: DetailedSolutionRequestModel):
             </head>
             <body>
                 <h1>Generated Solution</h1>
-                <p>{result[0]}</p>
+                {generated_solution_html}
                 <h2>Original Response</h2>
-                <p>{result[1]}</p>
+                {original_response_html}
                 <p>UserID: {request.userID}</p>
                 <p>RequestID: {request.requestID}</p>
             </body>
         </html>
         """
-        return HTMLResponse(content=html_response)
-
+        return HTMLResponse(content=html_response, status_code=200)
 
     except Exception as e:
         logger.error(f"Error generating detailed solution: {str(e)}")
