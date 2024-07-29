@@ -126,7 +126,14 @@ def generate_detailed_solution(request: DetailedSolutionRequestModel):
             formatted_text = ""
 
             for line in lines:
-                match = re.match(r"(\d+\.|[a-z]\.|[ivxlc]+\.)\s*(.*)", line.strip())
+                if line.strip().startswith("Step"):
+                    formatted_text += f'<p style="margin-left: 20px;"><strong>{line.strip()}</strong></p>'
+                    continue
+                
+                # Remove leading whitespace before processing
+                line = line.strip()
+                
+                match = re.match(r"(\d+\.|[a-z]\.|[ivxlc]+\.)\s*(.*)", line)
                 if match:
                     prefix = match.group(1)
                     content = match.group(2)
@@ -137,41 +144,32 @@ def generate_detailed_solution(request: DetailedSolutionRequestModel):
                     elif re.match(r"[ivxlc]+\.", prefix):
                         indent_level = 3
                     else:
-                        indent_level = 0
+                        indent_level = 4
                 else:
                     prefix = ""
-                    content = line.strip()
-                    indent_level = 0
+                    content = line
+                    indent_level = 4
 
+                # Use a single space after the opening curly brace for consistency
                 indent_style = f"margin-left: {20 * indent_level}px;"
                 formatted_text += f'<p style="{indent_style}">{prefix} {content}</p>'
+
 
             return formatted_text
 
         # Split the response into paragraphs
         generated_solution_paragraphs = result[0].split('\n\n')
-        original_response_paragraphs = result[1].split('\n\n')
 
         # Create HTML paragraphs with proper indentation
         generated_solution_html = ''.join(format_paragraph(para) for para in generated_solution_paragraphs if para.strip())
-        original_response_html = ''.join(format_paragraph(para) for para in original_response_paragraphs if para.strip())
 
-        html_response = f"""
-        <html>
-            <head>
-                <title>Generated Solution</title>
-            </head>
-            <body>
-                <h1>Generated Solution</h1>
-                {generated_solution_html}
-                <h2>Original Response</h2>
-                {original_response_html}
-                <p>UserID: {request.userID}</p>
-                <p>RequestID: {request.requestID}</p>
-            </body>
-        </html>
-        """
-        return HTMLResponse(content=html_response, status_code=200)
+        html_response = f"""<html><head><title>Generated Solution</title></head><body><h1>Generated Solution</h1>{''.join(format_paragraph(para) for para in generated_solution_paragraphs if para.strip())}</body></html>"""
+        return {
+            "response":  HTMLResponse(content=html_response),
+            "original_response": result[1],
+            "userID": request.userID,
+            "requestID": request.requestID,
+        }
 
     except Exception as e:
         logger.error(f"Error generating detailed solution: {str(e)}")
