@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Form from "./form";
 import MarkTable from "./markTable";
-
 
 interface Prompt {
   id: number;
@@ -10,23 +9,33 @@ interface Prompt {
   response: string;
 }
 
-const prompts: Prompt[] = [
-  {
-    id: 1,
-    text: "Provide tech stack solutions for IoT Home Automation development",
-    response: "Sure! Here are some tech stacks you can consider...",
-  },
-  {
-    id: 2,
-    text: "Suggest an Authentication solution and evaluate it on a High, Medium, or Low scale",
-    response:
-      "I can present tables in markdown format, which is commonly used in documentation and can\n be easily rendered in many platforms. Here's an example",
-  },
-];
-
 const ChatMarkdown: React.FC = () => {
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const { id } = useParams<{ id?: string }>();
+
+  useEffect(() => {
+    const fetchPrompt = async () => {
+      try {
+        const response = await fetch(`/api/prompts/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch prompt data");
+        }
+        const data: Prompt = await response.json();
+        setPrompt(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPrompt();
+    }
+  }, [id]);
 
   const handleSubmit = (query: string) => {
     console.log("Submitted query:", query);
@@ -34,10 +43,16 @@ const ChatMarkdown: React.FC = () => {
     // Handle form submission logic here if needed
   };
 
-  const prompt = id ? prompts.find((p) => p.id === parseInt(id, 10)) : undefined;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   if (!prompt) {
-    return null; // Handle case where prompt is not found
+    return <div>No prompt found for the given ID.</div>;
   }
 
   return (
