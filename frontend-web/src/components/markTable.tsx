@@ -39,7 +39,7 @@ const MarkTable: React.FC<MarkTableProps> = ({ data }) => {
     } else {
       try {
         const response = await fetch(
-          "http://18.237.155.139:8000/generate-detailed-solution",
+          "http://18.237.155.139:8000/generate-solutions",
           {
             method: "POST",
             headers: {
@@ -76,7 +76,7 @@ const MarkTable: React.FC<MarkTableProps> = ({ data }) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://18.237.155.139:8000/generate-solutions",
+          "http://127.0.0.1:8000/generate-solutions",
           {
             method: "POST",
             headers: {
@@ -110,65 +110,51 @@ const MarkTable: React.FC<MarkTableProps> = ({ data }) => {
 
   return (
     <div className="overflow-x-auto w-full">
-      <table className="min-w-full bg-white border-collapse border border-gray-300 text-sm">
+      <table className="min-w-full bg-white border-collapse border border-gray-300 text-sm rounded-lg">
         <thead>
-          <tr className="bg-gray-100 border-b border-gray-300 font-Inter">
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              AUTHENTICATION MODULES
-            </th>
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              MAINTENANCE
-            </th>
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              DEPENDENCY
-            </th>
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              COMPLEXITY
-            </th>
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              LEARNING CURVE
-            </th>
-            <th className="border border-gray-300 py-2 px-2 whitespace-nowrap">
-              EFFICIENCY
-            </th>
-            <th className="border border-gray-300 px-2 py-2 whitespace-nowrap">
-              SCORE
-            </th>
+          <tr className="bg-gray-100 border-b border-gray-300 font-semibold text-gray-800">
+            <th className="border border-gray-300 py-3 px-4">AUTHENTICATION MODULES</th>
+            <th className="border border-gray-300 py-3 px-4">MAINTENANCE</th>
+            <th className="border border-gray-300 py-3 px-4">DEPENDENCY</th>
+            <th className="border border-gray-300 py-3 px-4">COMPLEXITY</th>
+            <th className="border border-gray-300 py-3 px-4">LEARNING CURVE</th>
+            <th className="border border-gray-300 py-3 px-4">EFFICIENCY</th>
+            <th className="border border-gray-300 py-3 px-4">SCORE</th>
           </tr>
         </thead>
         <tbody>
           {tableData.map((item, index) => (
             <React.Fragment key={index}>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-300 hover:bg-gray-50 transition duration-150">
                 <td
-                  className="border border-gray-300 px-2 py-2 cursor-pointer"
+                  className="border border-gray-300 px-4 py-3 cursor-pointer text-blue-600 hover:text-blue-800"
                   onClick={() => toggleRowExpand(index, item.techStack)}
                 >
                   {item.techStack}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3">
                   {item.params.find((param: Param) => param.name === "scalability")?.value}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3">
                   {item.params.find((param: Param) => param.name === "cost")?.value}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3">
                   {item.params.find((param: Param) => param.name === "complexity")?.value}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3">
                   {item.params.find((param: Param) => param.name === "time")?.value}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3">
                   {item.params.find((param: Param) => param.name === "scalability")?.value}
                 </td>
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-4 py-3 text-center font-bold text-gray-700">
                   {item.totalScore}
                 </td>
               </tr>
               {expandedRows.includes(index) && (
                 <tr>
-                  <td colSpan={7} className="border border-gray-300 px-4 py-2">
-                    <div className="text-sm text-gray-600 mt-2">
+                  <td colSpan={7} className="border border-gray-300 px-6 py-4 bg-gray-50">
+                    <div className="text-sm text-gray-600">
                       <p>{detailedSolutions[index]?.original_response}</p>
                     </div>
                   </td>

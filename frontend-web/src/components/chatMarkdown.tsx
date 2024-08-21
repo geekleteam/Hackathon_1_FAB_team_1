@@ -31,13 +31,13 @@ const ChatMarkdown: React.FC = () => {
   const handleSubmit = (query: string) => {
     console.log("Submitted query:", query);
     setSubmitted(true);
-    // Handle form submission logic here if needed
+  
   };
 
   const prompt = id ? prompts.find((p) => p.id === parseInt(id, 10)) : undefined;
 
   if (!prompt) {
-    return null; // Handle case where prompt is not found
+    return null; 
   }
 
   return (

@@ -32,10 +32,39 @@ const ChatResponse: React.FC = () => {
     useState(false);
   const [checkedCount, setCheckedCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [responseData, setResponseData] = useState<string | null>(null);
   const { id } = useParams<{ id?: string }>();
 
-  const handleSubmit = (query: string) => {
+  const handleSubmit = async (query: string) => {
     console.log("Submitted query:", query);
+    setSubmitted(true);
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/generate-solutions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userID: "3b125dbd-ef03-44c6-85b6-beb0905e5ac1",
+          requestID: "39b710a7-0be3-4ada-8d5b-370d0808140d",
+          modelParameter: { temperature: 0.9 },
+          user_input: query,
+          filters: ["complexity", "scalability", "cost", "dimensions", "time", "network", "diversity"],
+          model_id: "anthropic.claude-3-haiku-20240307-v1:0",
+          proposed_solution: "Your proposed solution here",
+          tech_stack: "Your tech stack here"
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Backend Response:', data);
+      setResponseData(JSON.stringify(data, null, 2)); // Display response data
+
+    } catch (error) {
+      console.error("Error submitting query:", error);
+    }
+
     setSubmitted(true);
   };
 
@@ -44,7 +73,7 @@ const ChatResponse: React.FC = () => {
     : undefined;
 
   if (!prompt) {
-    return null;
+    return <div>Prompt not found</div>;
   }
 
   const handleMaintenanceItemChecked = (
@@ -98,15 +127,22 @@ const ChatResponse: React.FC = () => {
             <Complexity />
           </div>
         </div>
-        <div className="mt-1 bg-[#086224] text-white text-center mr-32  rounded-sm ">
-        <Link to={`/chat-markdown/${id}`} className="cursor-pointer">
+        <div className="mt-1 bg-[#086224] text-white text-center mr-32 rounded-sm ">
+          <Link to={`/chat-markdown/${id}`} className="cursor-pointer">
             Click to filter ({checkedCount})
           </Link>
         </div>
       </div>
       <Form onSubmit={handleSubmit} />
+      {responseData && (
+        <div className="bg-gray-100 p-4 rounded mt-4">
+          <h3 className="text-xl font-semibold">Response Data:</h3>
+          <pre className="text-sm">{responseData}</pre>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default ChatResponse;
