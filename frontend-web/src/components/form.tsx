@@ -8,14 +8,11 @@ interface FormData {
 
 const Form: React.FC<FormData> = ({ onSubmit }) => {
   const [query, setQuery] = useState("I need a solution on authentication");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Call the onSubmit prop function, which will handle the POST request
     onSubmit(query);
-    // Optionally, navigate to a different route or handle state updates
-    navigate(`/response/`); // Adjust navigation as needed
   };
 
   return (

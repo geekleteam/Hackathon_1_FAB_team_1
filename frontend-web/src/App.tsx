@@ -9,18 +9,18 @@ import Form from "./components/form";
 
 function App() {
   return (
-    <div className="App">
-      <Sidebar />
-      <Routes>
-        {/* Redirect from root to chat-interface */}
-        <Route path="/" element={<Navigate to="/chat-interface" />} />
-        <Route path="/" element={<Form onSubmit={() => {}} />} />
-        <Route path="/chat-interface" element={<ChatInterface />} />
-        <Route path="/response/:id" element={<ChatResponse  />} />
-        <Route path="/chat-markdown/:id" element={<ChatMarkdown />} />
-        <Route path="/filter-Page" element={<FilterPage />} />
-      </Routes>
-    </div>
+      <div className="App">
+        <Sidebar />
+        <Routes>
+          {/* Redirect from root to chat-interface */}
+          <Route path="/" element={<Navigate to="/chat-interface" />} />
+          <Route path="/" element={<Form onSubmit={() => {}} />} />
+          <Route path="/chat-interface" element={<ChatInterface />} />
+          <Route path={'/response/:id'} element={<ChatResponse  />} />
+          <Route path="/chat-markdown/:id" element={<ChatMarkdown />} />
+          <Route path="/filter-Page" element={<FilterPage />} />
+        </Routes>
+      </div>
   );
 }
 

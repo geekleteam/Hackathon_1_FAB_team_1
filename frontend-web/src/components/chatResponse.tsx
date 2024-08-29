@@ -1,16 +1,32 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import Form from "./form";
 import Efficiency from "./tables/efficiency";
 import Dependency from "./tables/dependency";
 import Complexity from "./tables/complexity";
 import Learning from "./tables/learning";
 import Maintenance from "./tables/maintenance";
-import Form from "./form";
+interface Param {
+  name: string;
+  value: string;
+}
+
+interface AdditionalNotes {
+  totalScoreExplanation: string;
+  githubLinks: string;
+}
+
+interface ResponseItem {
+  summary: string;
+  techStack: string;
+  additionalNotes: AdditionalNotes;
+  params: Param[];
+}
 
 interface Prompt {
   id: number;
   text: string;
-  response: string;
+  response: string; // Add the 'response' property
 }
 
 const prompts: Prompt[] = [
@@ -23,16 +39,16 @@ const prompts: Prompt[] = [
     id: 2,
     text: "Suggest an Authentication solution and evaluate it on a High, Medium, or Low scale",
     response:
-      "I can present tables in markdown format, which is commonly used in documentation and can\n be easily rendered in many platforms. Here's an example",
+    "I can present tables in markdown format, which is commonly used in documentation and can\n be easily rendered in many platforms. Here's an example",
   },
 ];
 
 const ChatResponse: React.FC = () => {
-  const [isExternalDependencyChecked, setIsExternalDependencyChecked] =
-    useState(false);
+  const [isExternalDependencyChecked, setIsExternalDependencyChecked] = useState(false);
   const [checkedCount, setCheckedCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [responseData, setResponseData] = useState<string | null>(null);
+  const [responseData, setResponseData] = useState<ResponseItem[]>([]);
+  const [originalResponse, setOriginalResponse] = useState<string>(""); // State for original response
   const { id } = useParams<{ id?: string }>();
 
   const handleSubmit = async (query: string) => {
@@ -40,46 +56,41 @@ const ChatResponse: React.FC = () => {
     setSubmitted(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/generate-solutions', {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:8000/generate-solutions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userID: "3b125dbd-ef03-44c6-85b6-beb0905e5ac1",
-          requestID: "39b710a7-0be3-4ada-8d5b-370d0808140d",
-          modelParameter: { temperature: 0.9 },
           user_input: query,
-          filters: ["complexity", "scalability", "cost", "dimensions", "time", "network", "diversity"],
-          model_id: "anthropic.claude-3-haiku-20240307-v1:0",
-          proposed_solution: "Your proposed solution here",
-          tech_stack: "Your tech stack here"
+          // other required request payload
         }),
       });
 
       const data = await response.json();
-      console.log('Backend Response:', data);
-      setResponseData(JSON.stringify(data, null, 2)); // Display response data
+      console.log("Backend Response:", data);
 
+      // Set the response data with only relevant information
+      if (data.response) {
+        setResponseData(data.response);
+      }
+
+      // Set the original response (new functionality)
+      if (data.original_response) {
+        setOriginalResponse(data.original_response);
+      }
     } catch (error) {
       console.error("Error submitting query:", error);
     }
-
-    setSubmitted(true);
   };
 
-  const prompt = id
-    ? prompts.find((p) => p.id === parseInt(id, 10))
-    : undefined;
+  const prompt = id ? prompts.find((p) => p.id === parseInt(id, 10)) : undefined;
 
   if (!prompt) {
-    return <div>Prompt not found</div>;
+    return null;
   }
 
-  const handleMaintenanceItemChecked = (
-    itemName: string,
-    isChecked: boolean
-  ) => {
+  const handleMaintenanceItemChecked = (itemName: string, isChecked: boolean) => {
     if (itemName === "Line of Code") {
       setIsExternalDependencyChecked(isChecked);
     }
@@ -90,14 +101,14 @@ const ChatResponse: React.FC = () => {
   };
 
   return (
-    <div
-      className={`flex flex-col p-2 ${
-        submitted ? "overflow-auto" : "overflow-hidden"
-      }`}
-    >
+    <div className={`flex flex-col p-2 ${submitted ? "overflow-auto" : "overflow-hidden"}`}>
       <div className="p-2 bg-[#F3F5F4] rounded-full mb-2 md:mt-2 ml-auto">
         <div className="text-[16px] text-black mb-2">{prompt.text}</div>
       </div>
+
+      <Form onSubmit={handleSubmit} />
+
+      {/* Existing functionality for displaying prompts */}
       <div className="p-4 bg-white mt-2 mx-auto max-w-4xl">
         <div className="text-black text-justify whitespace-pre-line py-2">
           {prompt.response}
@@ -113,12 +124,10 @@ const ChatResponse: React.FC = () => {
           <div className="flex flex-col space-y-2 -ml-16">
             <Dependency
               initialChecked={isExternalDependencyChecked}
-              onCheckedChange={(isChecked) => {
+              onCheckedChange={(isChecked: boolean) => {
                 setIsExternalDependencyChecked(isChecked);
                 setCheckedCount((prevCount) => {
-                  const newCount = isChecked
-                    ? prevCount + 1
-                    : Math.max(prevCount - 1, 0);
+                  const newCount = isChecked ? prevCount + 1 : Math.max(prevCount - 1, 0);
                   return newCount;
                 });
               }}
@@ -133,16 +142,47 @@ const ChatResponse: React.FC = () => {
           </Link>
         </div>
       </div>
-      <Form onSubmit={handleSubmit} />
-      {responseData && (
-        <div className="bg-gray-100 p-4 rounded mt-4">
-          <h3 className="text-xl font-semibold">Response Data:</h3>
-          <pre className="text-sm">{responseData}</pre>
+
+      {/* New functionality: Displaying the backend response data in a table */}
+      {responseData.length > 0 && (
+        <div className="mt-4">
+          {responseData.map((item, index) => (
+            <div key={index} className="bg-gray-100 p-4 rounded mb-4">
+              <h3 className="text-xl font-semibold">Solution {index + 1}:</h3>
+              <table className="min-w-full bg-white">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border-b">Parameter</th>
+                    <th className="py-2 px-4 border-b">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {item.params.map((param, idx) => (
+                    <tr key={idx}>
+                      <td className="py-2 px-4 border-b">{param.name}</td>
+                      <td className="py-2 px-4 border-b">{param.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-2 text-sm"><strong>Summary:</strong> {item.summary}</p>
+              <p className="text-sm"><strong>Tech Stack:</strong> {item.techStack}</p>
+              <p className="text-sm"><strong>Notes:</strong> {item.additionalNotes.totalScoreExplanation}</p>
+              <a href={item.additionalNotes.githubLinks} className="text-blue-500" target="_blank" rel="noopener noreferrer">GitHub Links</a>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Display the original response */}
+      {originalResponse && (
+        <div className="mt-4">
+          <h3 className="text-xl font-semibold">Original Response:</h3>
+          <p className="text-sm">{originalResponse}</p>
         </div>
       )}
     </div>
   );
 };
-
 
 export default ChatResponse;
